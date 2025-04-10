@@ -2,7 +2,8 @@
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useRef } from "react";
+import { useState, useRef } from "react";
+import { Loader2 } from "lucide-react";
 
 interface UploadFormInputProps {
   onSubmit: (
@@ -13,6 +14,7 @@ interface UploadFormInputProps {
 
 export default function UploadFormInput({ onSubmit }: UploadFormInputProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const resetInput = () => {
     if (fileInputRef.current) {
@@ -20,8 +22,11 @@ export default function UploadFormInput({ onSubmit }: UploadFormInputProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    onSubmit(e, resetInput);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsUploading(true);
+    await onSubmit(e, resetInput);
+    setIsUploading(false);
   };
 
   return (
@@ -35,8 +40,18 @@ export default function UploadFormInput({ onSubmit }: UploadFormInputProps) {
           accept="application/pdf"
           required
         />
-        <Button className="bg-violet-600 text-white hover:bg-violet-700">
-          Upload Your PDF
+        <Button
+          className="bg-violet-600 text-white hover:bg-violet-700"
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="animate-spin" size={16} />
+              Processing...
+            </span>
+          ) : (
+            "Upload Your PDF"
+          )}
         </Button>
       </div>
     </form>

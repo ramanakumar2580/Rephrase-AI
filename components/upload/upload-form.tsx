@@ -38,10 +38,12 @@ export default function UploadForm() {
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+    resetInput: () => void
+  ) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+    const formData = new FormData(e.currentTarget);
     const file = formData.get("file") as File;
 
     const validatedFields = schema.safeParse({ file });
@@ -62,10 +64,6 @@ export default function UploadForm() {
       return;
     }
 
-    toast("Extracting PDF content...", {
-      action: { label: "X", onClick: () => toast.dismiss() },
-    });
-
     const formattedResp = resp.map((file) => ({
       serverData: {
         userId: file?.serverData?.userId || "anonymous",
@@ -79,11 +77,7 @@ export default function UploadForm() {
     const summary = await generatePdfSummary([formattedResp[0]]);
     console.log("PDF Summary:", summary);
 
-    toast.success("Summary generated successfully!", {
-      action: { label: "X", onClick: () => toast.dismiss() },
-    });
-
-    form.reset();
+    resetInput();
   };
 
   return (

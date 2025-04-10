@@ -12,8 +12,7 @@ async function getSummary(pdfText: string, model: string) {
       { role: "system", content: SUMMARY_SYSTEM_PROMPT },
       {
         role: "user",
-        content: `Transform this document into an engaging, easy-to-read summary 
-        with contextually relevant emojis and proper markdown formatting:\n\n${pdfText}`,
+        content: `Transform this document into an engaging, easy-to-read summary with contextually relevant emojis and proper markdown formatting:\n\n${pdfText}`,
       },
     ],
     temperature: 0.7,
@@ -38,9 +37,9 @@ async function withRetry(
       return summary;
     } catch (error: any) {
       if (error?.status === 429 && attempt < retries - 1) {
-        console.warn(`Rate limit hit. Retrying in ${delay}ms...`);
+        console.log(`Rate limit hit. Retrying in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
-        delay *= 2; // exponential backoff
+        delay *= 2;
       } else {
         throw error;
       }
@@ -54,7 +53,6 @@ export async function generateSummaryFromOpenAI(pdfText: string) {
     return await withRetry(pdfText, "gpt-4o");
   } catch (error: any) {
     if (error?.status === 404 && error?.code === "model_not_found") {
-      console.warn("GPT-4 not available. Falling back to GPT-3.5-Turbo.");
       return await withRetry(pdfText, "gpt-3.5-turbo");
     }
     throw error;

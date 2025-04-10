@@ -1,11 +1,16 @@
-import { SUMMARY_SYSTEM_PROMPT } from "@/utils/prompts";
-
 const HUGGINGFACE_API_URL =
   "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
+const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || "";
 
-async function getSummaryFromHuggingFace(pdfText: string): Promise<string> {
-  const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN;
+function splitTextIntoChunks(text: string, chunkSize = 2800): string[] {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += chunkSize) {
+    chunks.push(text.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
 
+async function summarizeChunk(chunk: string): Promise<string> {
   const response = await fetch(HUGGINGFACE_API_URL, {
     method: "POST",
     headers: {
@@ -13,43 +18,50 @@ async function getSummaryFromHuggingFace(pdfText: string): Promise<string> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      inputs: `${SUMMARY_SYSTEM_PROMPT}\n\n${pdfText.slice(0, 4096)}`, // Limit input
+      inputs: chunk,
+      parameters: {
+        max_length: 200,
+        min_length: 60,
+        do_sample: false,
+      },
     }),
   });
 
   const data = await response.json();
+  console.log("Hugging Face status:", response.status);
+  console.log("Hugging Face response:", data);
 
-  if (!Array.isArray(data) || !data[0]?.summary_text) {
-    console.error("Invalid response from HuggingFace:", data);
-    throw new Error("HuggingFace summarization failed");
+  if (!response.ok || data.error) {
+    throw new Error("Summary generation failed from Hugging Face");
   }
 
-  return data[0].summary_text;
+  const summary = Array.isArray(data)
+    ? data[0]?.summary_text
+    : data?.summary_text;
+
+  if (!summary) {
+    throw new Error("Summary generation failed from Hugging Face");
+  }
+
+  return summary;
 }
 
-async function withRetry(
-  pdfText: string,
-  retries = 3,
-  delay = 1000
-): Promise<string> {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      const summary = await getSummaryFromHuggingFace(pdfText);
-      if (!summary) throw new Error("Received empty summary from HuggingFace");
-      return summary;
-    } catch (error: any) {
-      if (error?.status === 429 && attempt < retries - 1) {
-        console.warn(`HuggingFace rate limit hit. Retrying in ${delay}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        delay *= 2;
-      } else {
-        throw error;
-      }
+export const generateSummaryFromHuggingFace = async (pdfText: string) => {
+  try {
+    const chunks = splitTextIntoChunks(pdfText, 2800);
+    const allSummaries: string[] = [];
+
+    for (let i = 0; i < chunks.length; i++) {
+      console.log(`Summarizing chunk ${i + 1}/${chunks.length}`);
+      const summary = await summarizeChunk(chunks[i]);
+      allSummaries.push(summary);
     }
-  }
-  throw new Error("HUGGINGFACE_RATE_LIMIT_EXCEEDED");
-}
 
-export async function generateSummaryFromHuggingFace(pdfText: string) {
-  return await withRetry(pdfText);
-}
+    const finalSummary = allSummaries.join("\n\n");
+    console.log("Final HuggingFace Summary:", finalSummary);
+    return finalSummary;
+  } catch (error: any) {
+    console.error("HuggingFace Error:", error);
+    throw error;
+  }
+};

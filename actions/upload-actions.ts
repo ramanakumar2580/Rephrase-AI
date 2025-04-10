@@ -32,17 +32,28 @@ export async function generatePdfSummary(
 
     try {
       summary = await generateSummaryFromOpenAI(pdfText);
-      console.log({ summary });
+      console.log("OpenAI Summary:", summary);
     } catch (error) {
-      if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
+      const errorMessage = (error as any)?.message || "";
+      const errorCode = (error as any)?.code || "";
+
+      const isQuotaError =
+        errorMessage.includes("You exceeded your current quota") ||
+        errorCode === "insufficient_quota" ||
+        errorMessage.includes("insufficient_quota") ||
+        errorMessage === "RATE_LIMIT_EXCEEDED";
+
+      if (isQuotaError) {
         try {
           summary = await generateSummaryFromGemini(pdfText);
-          console.log({ summary });
-        } catch {
+          console.log("Gemini Summary:", summary);
+        } catch (geminiError) {
+          console.error("Gemini Failed:", geminiError);
           try {
             summary = await generateSummaryFromHuggingFace(pdfText);
-            console.log({ summary });
-          } catch {
+            console.log("HuggingFace Summary:", summary);
+          } catch (huggingFaceError) {
+            console.error("Hugging Face Failed:", huggingFaceError);
             return {
               success: false,
               message:
@@ -52,6 +63,7 @@ export async function generatePdfSummary(
           }
         }
       } else {
+        console.error("OpenAI Error:", error);
         return {
           success: false,
           message: "An error occurred while generating the summary.",

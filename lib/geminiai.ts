@@ -22,8 +22,7 @@ export const generateSummaryFromGemini = async (pdfText: string) => {
               text: SUMMARY_SYSTEM_PROMPT,
             },
             {
-              text: `Transform this document into an engaging, easy-to-read summary with 
-              contextually relevant emojis and proper markdown formatting:\n\n${pdfText}`,
+              text: `Transform this document into an engaging, easy-to-read summary with contextually relevant emojis and proper markdown formatting:\n\n${pdfText}`,
             },
           ],
         },
@@ -32,10 +31,14 @@ export const generateSummaryFromGemini = async (pdfText: string) => {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    if (!response.text()) {
-      throw new Error("Empty responses from Gemini API");
+    const content = response.text();
+
+    if (!content) {
+      throw new Error("Empty response from Gemini API");
     }
-    return response.text();
+
+    console.log("Gemini Summary:", content);
+    return content;
   } catch (error: any) {
     console.error("Gemini API Error:", error);
     throw error;
