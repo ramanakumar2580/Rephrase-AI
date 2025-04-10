@@ -14,7 +14,7 @@ export default function HeroSection() {
           <Badge
             variant="secondary"
             className="relative px-6 py-2 text-base font-medium bg-white 
-            rounded-full group-hover:bg-gray-50 transition-colors duration-200"
+            rounded-full group-hover:bg-indigo-100 transition-colors duration-200"
           >
             <Sparkles
               className="mr-3 text-violet-600 animate-pulse"
