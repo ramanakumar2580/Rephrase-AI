@@ -13,7 +13,7 @@ const fontsans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Rephrase- AI-Powered pdf summarization",
+  title: "DocSift AI - Powered pdf summarization",
   description:
     "Save hourse of reading time. Transform lengthy pdfs into clear, accurate summaries in seconds with our advanced AI technology",
 };
