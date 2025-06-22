@@ -10,7 +10,9 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { deleteSummaryAction } from "@/actions/summary-actions";
+import { toast } from "sonner";
 
 interface DeleteButtonProps {
   summaryId: string;
@@ -18,9 +20,21 @@ interface DeleteButtonProps {
 
 export default function DeleteButton({ summaryId }: DeleteButtonProps) {
   const [open, setOpen] = useState(false);
-
+  const [isPending, startTransition] = useTransition();
   const handleDelete = async () => {
-    setOpen(false);
+    startTransition(async () => {
+      const result = await deleteSummaryAction({ summaryId });
+      if (!result.success) {
+        toast("Failed to delete summary", {
+          description: "Please try again.",
+          action: {
+            label: "Close",
+            onClick: () => toast.dismiss(),
+          },
+        });
+      }
+      setOpen(false);
+    });
   };
 
   return (
@@ -58,7 +72,7 @@ export default function DeleteButton({ summaryId }: DeleteButtonProps) {
            bg-gray-900 hover:bg-gray-600"
             onClick={handleDelete}
           >
-            Delete
+            {isPending ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </DialogContent>
