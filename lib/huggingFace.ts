@@ -1,6 +1,7 @@
-const HUGGINGFACE_API_URL =
-  "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || "";
+
+const SUMMARY_MODEL_URL =
+  "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 
 function splitTextIntoChunks(text: string, chunkSize = 2800): string[] {
   const chunks = [];
@@ -10,8 +11,23 @@ function splitTextIntoChunks(text: string, chunkSize = 2800): string[] {
   return chunks;
 }
 
+function generateTitleFromFilename(fileName: string): string {
+  const name = fileName
+    .replace(/\.pdf$/i, "")
+    .replace(/[_\-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const titleCase = name
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  return titleCase ? ` ${titleCase} Summary` : "Summary";
+}
+
 async function summarizeChunk(chunk: string): Promise<string> {
-  const response = await fetch(HUGGINGFACE_API_URL, {
+  const response = await fetch(SUMMARY_MODEL_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${HUGGINGFACE_API_TOKEN}`,
@@ -28,10 +44,9 @@ async function summarizeChunk(chunk: string): Promise<string> {
   });
 
   const data = await response.json();
-  console.log("Hugging Face status:", response.status);
-  console.log("Hugging Face response:", data);
 
   if (!response.ok || data.error) {
+    console.error("Summary model error:", data);
     throw new Error("Summary generation failed from Hugging Face");
   }
 
@@ -39,17 +54,20 @@ async function summarizeChunk(chunk: string): Promise<string> {
     ? data[0]?.summary_text
     : data?.summary_text;
 
-  if (!summary) {
-    throw new Error("Summary generation failed from Hugging Face");
-  }
+  if (!summary) throw new Error("Empty summary returned");
 
-  return summary;
+  return summary.trim();
 }
 
-export const generateSummaryFromHuggingFace = async (pdfText: string) => {
+export const generateSummaryFromHuggingFace = async (
+  pdfText: string,
+  fileName: string
+) => {
   try {
     const chunks = splitTextIntoChunks(pdfText, 2800);
     const allSummaries: string[] = [];
+
+    console.log("Hugging Face model : ");
 
     for (let i = 0; i < chunks.length; i++) {
       console.log(`Summarizing chunk ${i + 1}/${chunks.length}`);
@@ -58,10 +76,20 @@ export const generateSummaryFromHuggingFace = async (pdfText: string) => {
     }
 
     const finalSummary = allSummaries.join("\n\n");
-    console.log("Final HuggingFace Summary:", finalSummary);
-    return finalSummary;
+
+    const smartTitle = generateTitleFromFilename(fileName);
+    console.log("Generated Title:", smartTitle);
+
+    const structuredSummary = JSON.stringify([
+      {
+        title: smartTitle,
+        content: finalSummary,
+      },
+    ]);
+
+    return structuredSummary;
   } catch (error: any) {
-    console.error("HuggingFace Error:", error);
+    console.error("HuggingFace Final Error:", error);
     throw error;
   }
 };

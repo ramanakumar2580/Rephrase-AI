@@ -62,7 +62,7 @@ export async function generatePdfSummary(
         } catch (geminiError) {
           console.error("Gemini Failed:", geminiError);
           try {
-            summary = await generateSummaryFromHuggingFace(pdfText);
+            summary = await generateSummaryFromHuggingFace(pdfText, fileName);
             console.log("HuggingFace Summary:", summary);
           } catch (huggingFaceError) {
             console.error("Hugging Face Failed:", huggingFaceError);

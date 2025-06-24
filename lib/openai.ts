@@ -5,9 +5,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function getSummary(pdfText: string, model: string) {
+async function getSummary(pdfText: string) {
   const completion = await openai.chat.completions.create({
-    model,
+    model: "gpt-3.5-turbo", // ✅ free tier
     messages: [
       { role: "system", content: SUMMARY_SYSTEM_PROMPT },
       {
@@ -22,38 +22,19 @@ async function getSummary(pdfText: string, model: string) {
   return completion.choices[0].message.content;
 }
 
-async function withRetry(
-  pdfText: string,
-  model: string,
-  retries = 3,
-  delay = 1000
-): Promise<string> {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      const summary = await getSummary(pdfText, model);
-      if (summary === null) {
-        throw new Error("Summary generation failed: received null.");
-      }
-      return summary;
-    } catch (error: any) {
-      if (error?.status === 429 && attempt < retries - 1) {
-        console.log(`Rate limit hit. Retrying in ${delay}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        delay *= 2;
-      } else {
-        throw error;
-      }
-    }
-  }
-  throw new Error("RATE_LIMIT_EXCEEDED");
-}
-
 export async function generateSummaryFromOpenAI(pdfText: string) {
   try {
-    return await withRetry(pdfText, "gpt-4o");
+    const summary = await getSummary(pdfText);
+    if (!summary) throw new Error("Summary generation returned empty.");
+    return summary;
   } catch (error: any) {
-    if (error?.status === 404 && error?.code === "model_not_found") {
-      return await withRetry(pdfText, "gpt-3.5-turbo");
+    if (error?.status === 429) {
+      console.error("Rate limit exceeded:", {
+        status: error.status,
+        statusText: error.statusText || "Too Many Requests",
+      });
+    } else {
+      console.error("OpenAI Error:", error);
     }
     throw error;
   }

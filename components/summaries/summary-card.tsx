@@ -47,10 +47,19 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function SummaryCard({ summary }: { summary: any }) {
+  const shortPreview = (() => {
+    try {
+      const parsed = JSON.parse(summary.summary_text);
+      return parsed?.[0]?.content?.slice(0, 200) ?? "";
+    } catch {
+      return summary.summary_text?.slice(0, 200) ?? "";
+    }
+  })();
+
   return (
     <div>
       <Card className="relative h-full">
-        <div className="absolute top-2 right-2 ">
+        <div className="absolute top-2 right-2">
           <DeleteButton summaryId={summary.id} />
         </div>
         <Link href={`summaries/${summary.id}`} className="block p-4 sm:p-6">
@@ -61,7 +70,7 @@ export default function SummaryCard({ summary }: { summary: any }) {
               createdAt={summary.created_at}
             />
             <p className="text-gray-600 line-clamp-2 text-sm sm:text-base pl-2">
-              {summary.summary_text}
+              {shortPreview}
             </p>
             <div className="flex justify-between items-center mt-2 sm:mt-4">
               <StatusBadge status={summary.status} />

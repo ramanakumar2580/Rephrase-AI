@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 export const generateSummaryFromGemini = async (pdfText: string) => {
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-pro-002",
+      model: "gemini-1.0-pro", // ✅ supported on v1beta
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 1500,
@@ -18,9 +18,7 @@ export const generateSummaryFromGemini = async (pdfText: string) => {
         {
           role: "user",
           parts: [
-            {
-              text: SUMMARY_SYSTEM_PROMPT,
-            },
+            { text: SUMMARY_SYSTEM_PROMPT },
             {
               text: `Transform this document into an engaging, easy-to-read summary with contextually relevant emojis and proper markdown formatting:\n\n${pdfText}`,
             },
@@ -37,10 +35,16 @@ export const generateSummaryFromGemini = async (pdfText: string) => {
       throw new Error("Empty response from Gemini API");
     }
 
-    console.log("Gemini Summary:", content);
     return content;
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
+    if (error?.status === 429) {
+      console.error("Rate limit exceeded:", {
+        status: error.status,
+        statusText: error.statusText || "Too Many Requests",
+      });
+    } else {
+      console.error("Gemini API Error:", error);
+    }
     throw error;
   }
 };
