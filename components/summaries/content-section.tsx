@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 
 export function ContentSection({ group }: { group: string[] }) {
   return (
-    <div className="flex flex-col px-6 py-4 gap-4 justify-center">
-      {group.map((point, idx) => (
+    <div className="flex flex-col gap-4 items-center justify-start h-full">
+      {group.map((point, i) => (
         <motion.div
-          key={idx}
+          key={i}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: idx * 0.15, duration: 0.3 }}
-          className="bg-violet-50 border border-violet-200 text-black text-sm sm:text-base rounded-xl px-4 py-3 shadow-sm"
+          transition={{ delay: i * 0.1 }}
+          className="bg-violet-50 border border-violet-100 text-black text-sm px-4 py-3 rounded-xl w-full max-w-full text-center shadow break-words"
         >
           {point}
         </motion.div>

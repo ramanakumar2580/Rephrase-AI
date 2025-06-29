@@ -1,14 +1,15 @@
+// utils/summary-helper.ts
+
 export function groupSummaryPoints(content: string, groupSize = 3): string[][] {
-  const points = content
-    // Split on full stops NOT preceded by a single uppercase letter (like "M.") or common abbreviations
-    .split(/(?<!\b[A-Z])\.(?=\s|$)/g)
+  // Avoid breaking on abbreviations like "M. Ramana"
+  const sentences = content
+    .split(/(?<=[^A-Z].[.?!])\s+(?=[A-Z])/g) // Improved sentence split
     .map((s) => s.trim())
-    .filter(Boolean)
-    .map((s) => (s.endsWith(".") ? s : s + "."));
+    .filter(Boolean);
 
   const groups: string[][] = [];
-  for (let i = 0; i < points.length; i += groupSize) {
-    groups.push(points.slice(i, i + groupSize));
+  for (let i = 0; i < sentences.length; i += groupSize) {
+    groups.push(sentences.slice(i, i + groupSize));
   }
   return groups;
 }

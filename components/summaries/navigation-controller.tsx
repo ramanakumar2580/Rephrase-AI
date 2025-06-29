@@ -1,8 +1,13 @@
 "use client";
-
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
-import { ProgressBar } from "./progress-bar";
+
+type Props = {
+  currentIndex: number;
+  total: number;
+  onChange: (index: number) => void;
+  onLongPressStart: (dir: "next" | "prev") => void;
+  onLongPressEnd: () => void;
+};
 
 export function NavigationController({
   currentIndex,
@@ -10,47 +15,43 @@ export function NavigationController({
   onChange,
   onLongPressStart,
   onLongPressEnd,
-}: {
-  currentIndex: number;
-  total: number;
-  onChange: (i: number) => void;
-  onLongPressStart: (dir: "next" | "prev") => void;
-  onLongPressEnd: () => void;
-}) {
-  const holdTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  const handleDown = (dir: "next" | "prev") => {
-    holdTimeout.current = setTimeout(() => onLongPressStart(dir), 300);
-  };
-  const handleUp = () => {
-    if (holdTimeout.current) clearTimeout(holdTimeout.current);
-    onLongPressEnd();
-  };
-
+}: Props) {
   return (
-    <div className="w-full flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between w-full px-2 sm:px-4">
+      {/* Left Arrow */}
       <button
         onClick={() => onChange(currentIndex - 1)}
-        onMouseDown={() => handleDown("prev")}
-        onMouseUp={handleUp}
-        onMouseLeave={handleUp}
-        disabled={currentIndex === 0}
-        className="p-2 rounded-full bg-violet-100 hover:bg-violet-200 disabled:opacity-30"
+        onMouseDown={() => onLongPressStart("prev")}
+        onMouseUp={onLongPressEnd}
+        onTouchStart={() => onLongPressStart("prev")}
+        onTouchEnd={onLongPressEnd}
+        className="w-9 h-9 rounded-full bg-violet-100 text-violet-600 hover:bg-violet-200 flex items-center justify-center"
       >
-        <ChevronLeft className="w-4 h-4 text-violet-600" />
+        <ChevronLeft size={18} />
       </button>
 
-      <ProgressBar total={total} current={currentIndex} />
+      {/* Dot Navigation */}
+      <div className="flex gap-1">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={`w-2 h-2 rounded-full ${
+              i === currentIndex ? "bg-violet-600" : "bg-violet-300"
+            }`}
+          />
+        ))}
+      </div>
 
+      {/* Right Arrow */}
       <button
         onClick={() => onChange(currentIndex + 1)}
-        onMouseDown={() => handleDown("next")}
-        onMouseUp={handleUp}
-        onMouseLeave={handleUp}
-        disabled={currentIndex === total - 1}
-        className="p-2 rounded-full bg-violet-100 hover:bg-violet-200 disabled:opacity-30"
+        onMouseDown={() => onLongPressStart("next")}
+        onMouseUp={onLongPressEnd}
+        onTouchStart={() => onLongPressStart("next")}
+        onTouchEnd={onLongPressEnd}
+        className="w-9 h-9 rounded-full bg-violet-100 text-violet-600 hover:bg-violet-200 flex items-center justify-center"
       >
-        <ChevronRight className="w-4 h-4 text-violet-600" />
+        <ChevronRight size={18} />
       </button>
     </div>
   );
