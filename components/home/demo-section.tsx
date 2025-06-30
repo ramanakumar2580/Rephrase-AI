@@ -97,7 +97,7 @@ export default function DemoSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto max-w-3xl px-4 font-bold text-3xl sm:px-6"
           >
-            Watch how DocSift AI transforms{" "}
+            Watch how RePhrase AI transforms{" "}
             <span className="bg-gradient-to-r from-violet-500 to-violet-500 bg-clip-text text-transparent">
               this Next.js course PDF
             </span>{" "}

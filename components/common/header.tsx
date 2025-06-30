@@ -23,7 +23,7 @@ export default function Header() {
           <NavLink href="/" className="flex items-center gap-1 lg:gap-2">
             <FileText className="w-5 h-5 lg:w-8 lg:h-8 text-gray-900" />
             <span className="font-extrabold lg:text-xl text-gray-900">
-              DocSift AI
+              RePhrase AI
             </span>
           </NavLink>
         </MotionDiv>

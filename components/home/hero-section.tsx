@@ -106,7 +106,7 @@ export default function HeroSection() {
         font-bold shadow-lg transition-all duration-300"
         >
           <Link href="/#pricing" className="flex gap-2 items-center">
-            <span>Try DocSift AI</span>
+            <span>Try RePhrase AI</span>
             <ArrowRight className="animate-pulse" />
           </Link>
         </Button>
