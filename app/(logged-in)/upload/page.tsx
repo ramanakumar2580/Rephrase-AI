@@ -1,5 +1,6 @@
 import BgGradient from "@/components/common/bg-gradient";
 import UploadForm from "@/components/upload/upload-form";
+import UploadFormInput from "@/components/upload/upload-form-input";
 import UploadHeader from "@/components/upload/upload-header";
 import { hasReachedUploadLimit } from "@/lib/user";
 import { currentUser } from "@clerk/nextjs/server";
@@ -11,8 +12,9 @@ export default async function Page() {
     redirect("/sign-in");
   }
   const userId = user.id;
-  const { hasReachedLimit } = await hasReachedUploadLimit(userId);
+  const { hasReachedLimit } = await hasReachedUploadLimit(user);
 
+  //todo: remove this
   if (hasReachedLimit) {
     redirect("/dashboard");
   }

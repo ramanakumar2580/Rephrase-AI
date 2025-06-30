@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface UploadFormInputProps {
   onSubmit: (
@@ -30,7 +31,13 @@ export default function UploadFormInput({ onSubmit }: UploadFormInputProps) {
   };
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+    <motion.form
+      className="flex flex-col gap-6"
+      onSubmit={handleSubmit}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="flex justify-end items-center gap-1.5">
         <Input
           ref={fileInputRef}
@@ -54,6 +61,6 @@ export default function UploadFormInput({ onSubmit }: UploadFormInputProps) {
           )}
         </Button>
       </div>
-    </form>
+    </motion.form>
   );
 }

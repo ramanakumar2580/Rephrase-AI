@@ -1,22 +1,30 @@
--- Enable UUID extension
+-- Drop old tables if they exist to ensure a clean start
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS pdf_summaries;
+DROP TABLE IF EXISTS users;
+
+-- Enable UUID extension for other tables if needed
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table
+-- Corrected Users Table
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id TEXT PRIMARY KEY, -- Changed to TEXT to store Clerk User ID
     email VARCHAR(255) UNIQUE NOT NULL,
+    full_name VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    full_name VARCHAR(255),
-    customer_id VARCHAR(255) UNIQUE,
-    price_id VARCHAR(255),
-    status VARCHAR(50) DEFAULT 'inactive'
+    
+    -- Stripe Columns
+    stripe_customer_id       VARCHAR(255) UNIQUE,
+    stripe_subscription_id   VARCHAR(255) UNIQUE,
+    stripe_price_id          VARCHAR(255),
+    stripe_current_period_end TIMESTAMP WITH TIME ZONE
 );
 
--- PDF Summaries table (for storing PDF processing results)
+-- Corrected PDF Summaries Table
 CREATE TABLE pdf_summaries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id VARCHAR(255) NOT NULL,
+    user_id TEXT NOT NULL REFERENCES users(id), -- Connects to the new TEXT user ID
     original_file_url TEXT NOT NULL,
     summary_text TEXT NOT NULL,
     status VARCHAR(50) DEFAULT 'completed',
@@ -26,19 +34,7 @@ CREATE TABLE pdf_summaries (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Payments table
-CREATE TABLE payments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    amount INTEGER NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    stripe_payment_id VARCHAR(255) UNIQUE NOT NULL,
-    price_id VARCHAR(255) NOT NULL,
-    user_email VARCHAR(255) NOT NULL REFERENCES users(email),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create updated_at trigger function
+-- Trigger function and triggers remain the same, just ensure they are applied
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -47,7 +43,6 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Add triggers to update updated_at
 CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW
@@ -57,8 +52,3 @@ CREATE TRIGGER update_pdf_summaries_updated_at
     BEFORE UPDATE ON pdf_summaries
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_payments_updated_at
-    BEFORE UPDATE ON payments
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column(); 
