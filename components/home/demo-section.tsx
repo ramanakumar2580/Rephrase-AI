@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import {
   BrainCircuit,
@@ -13,7 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { MotionDiv, MotionH3 } from "../common/motion-wrapper";
 
-// 1. Added more points to the summary array
+// Summary points for the carousel
 const summaryPoints = [
   {
     icon: <BrainCircuit className="h-6 w-6 shrink-0 text-violet-500" />,
@@ -73,13 +74,22 @@ export default function DemoSection() {
           />
         </div>
 
+        {/* Animated Pizza Icon & Title */}
         <div className="flex flex-col items-center space-y-4 text-center">
-          <div
-            className="mb-4 inline-flex items-center justify-center rounded-2xl border
-            border-gray-500/20 bg-gray-100/80 p-2 backdrop-blur-xs"
+          <motion.div
+            initial={{ scale: 0.8, rotate: -10, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{
+              duration: 0.6,
+              ease: "easeOut",
+              type: "spring",
+              bounce: 0.3,
+            }}
+            className="mb-4 inline-flex items-center justify-center rounded-2xl border border-gray-500/20 bg-gray-100/80 p-2 backdrop-blur-xs"
           >
             <Pizza className="h-6 w-6 text-violet-500" />
-          </div>
+          </motion.div>
+
           <MotionH3
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
@@ -95,17 +105,16 @@ export default function DemoSection() {
           </MotionH3>
         </div>
 
-        {/* Self-Contained Carousel */}
+        {/* Carousel Section */}
         <MotionDiv
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          // 3. Card is now less wide and more 'square'
           className="mx-auto mt-20 w-full max-w-2xl"
         >
           <div className="rounded-2xl border border-gray-200/80 bg-white/60 p-6 shadow-xl backdrop-blur-lg sm:p-8">
-            {/* 2. Smaller, more subtle progress bar */}
+            {/* Progress Bar */}
             <div className="mb-6 flex w-full gap-1.5 px-2 sm:px-4">
               {summaryPoints.map((_, index) => (
                 <div
@@ -145,7 +154,7 @@ export default function DemoSection() {
               </AnimatePresence>
             </div>
 
-            {/* Custom Navigation */}
+            {/* Navigation */}
             <div className="mt-8 flex items-center justify-between px-2 sm:px-4">
               <button
                 onClick={handlePrev}
@@ -155,6 +164,7 @@ export default function DemoSection() {
               >
                 <ChevronLeft />
               </button>
+
               <div className="flex items-center gap-2">
                 {summaryPoints.map((_, index) => (
                   <button
@@ -167,6 +177,7 @@ export default function DemoSection() {
                   />
                 ))}
               </div>
+
               <button
                 onClick={handleNext}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-transparent bg-violet-500 text-white transition-all hover:bg-violet-600 disabled:opacity-50"
