@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rephrase-AI | Convert lengthy PDFs into smart, concise summaries.
+
+This repository contains the source code for my rephrase- ai website, built from the ground up with a modern, professional tech stack to showcase my skills and projects.
+
+**Live Site**: [rephrase-ai-xvug.vercel.app](https://rephrase-ai-xvug.vercel.app/)
+
+##  Features
+
+- **Fully Responsive Design**  
+  A clean, professional, and mobile-first user interface that looks great on all devices.
+
+- **Stripe Integration**  
+  Seamless and secure payment handling using Stripe. Supports transactions with real-time webhook verification, ensuring smooth and safe checkout experiences.
+
+- **AI Integration with Smart Fallback**  
+  Robust multi-AI system for NLP and summarization. If OpenAI GPT is unavailable due to rate limits or errors, the system automatically falls back to Google Gemini, and if that also      fails, it switches to Hugging Face — guaranteeing uninterrupted AI functionality.
+
+- **Dynamic Animations**  
+  Built with **Framer Motion**, including page transitions, staggered reveals, and smooth hover interactions.
+
+- **Glassmorphism UI**  
+  Semi-transparent, blurred panels for navbar, cards, and footer with a modern layered look.
+
+---
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion
+- **Deployment**: Vercel
+
+---
 
 ## Getting Started
 
-First, run the development server:
+To set up and run this project locally:
 
+### 1. Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/ramanakumar2580/Rephrase-AI.git
+```
+```bash
+cd Rephrase-AI
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+- Make sure you have Node.js installed
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Set up Environment Variables
+- Create a file named .env.local in the root of the project and add the following variable. This is required to make the contact form work.
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+UPLOADTHING_TOKEN=your_uploadthing_token
 
-## Learn More
+OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_key
+HUGGINGFACE_API_TOKEN=your_huggingface_token
 
-To learn more about Next.js, take a look at the following resources:
+DATABASE_URL=your_database_connection_string
+NODE_ENV=development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+- You can get a free API key for all of them above.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 4. Run the Development Server
+```bash
+npm run dev
+```
+- Open http://localhost:3000 in your browser to view the site.
